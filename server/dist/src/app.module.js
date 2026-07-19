@@ -14,12 +14,13 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const websocket_module_1 = require("./websocket/websocket.module");
 const redis_module_1 = require("./redis/redis.module");
 const auth_module_1 = require("./auth/auth.module");
+const document_module_1 = require("./document/document.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, websocket_module_1.WebsocketModule, redis_module_1.RedisModule, auth_module_1.AuthModule],
+        imports: [prisma_module_1.PrismaModule, websocket_module_1.WebsocketModule, redis_module_1.RedisModule, auth_module_1.AuthModule, document_module_1.DocumentModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })
