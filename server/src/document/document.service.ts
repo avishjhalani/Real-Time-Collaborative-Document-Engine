@@ -32,14 +32,13 @@ export class DocumentService {
 
   // 3. Get details of a single document
   async getDocument(docId: string, userId: string) {
-    const doc = await this.prisma.document.findFirst({
+    const doc = await this.prisma.document.findUnique({
       where: {
         id: docId,
-        ownerId: userId,
       },
     });
     if (!doc) {
-      throw new NotFoundException('Document not found or unauthorized');
+      throw new NotFoundException('Document not found');
     }
     return doc;
   }

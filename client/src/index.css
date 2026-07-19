@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-slate-950 text-slate-100 min-h-screen antialiased;
+  background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.05), transparent 40%);
+}
+
+/* TipTap Editor Styling - Custom Dark Mode Editor Theme */
+.ProseMirror {
+  @apply outline-none min-h-[400px] text-slate-200 leading-relaxed text-lg p-6;
+}
+
+.ProseMirror p {
+  @apply mb-4;
+}
+
+.ProseMirror h1 {
+  @apply text-3xl font-extrabold tracking-tight text-white mb-6 mt-4;
+}
+
+.ProseMirror h2 {
+  @apply text-2xl font-bold tracking-tight text-white mb-4 mt-4;
+}
+
+/* Collaborative Cursors Styling */
+.collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: currentColor;
+  word-break: normal;
+  pointer-events: none;
+}
+
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -2px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 3px 3px 3px 0;
+  white-space: nowrap;
+}

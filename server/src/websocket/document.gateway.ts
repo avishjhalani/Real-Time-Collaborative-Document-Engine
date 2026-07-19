@@ -23,12 +23,30 @@ export class DocumentGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   private activeDocs = new Map<string, Y.Doc>();
   private roomUserCounts = new Map<string, number>();
+  private saveTimeouts = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private prisma: PrismaService,
     private redisService: RedisService,
     private jwtService: JwtService, // Inject JwtService
   ) {}
+
+  // Helper method to save Y.Doc state to the PostgreSQL database
+  async saveDocumentToDb(docId: string) {
+    const ydoc = this.activeDocs.get(docId);
+    if (!ydoc) return;
+
+    const content = Buffer.from(Y.encodeStateAsUpdate(ydoc));
+    try {
+      await this.prisma.document.update({
+        where: { id: docId },
+        data: { content },
+      });
+      console.log(`Document ${docId} successfully saved to database.`);
+    } catch (err) {
+      console.error(`Failed to save document ${docId} to database:`, err);
+    }
+  }
 
   // 1. Authenticate connection handshake
   async handleConnection(client: Socket) {
@@ -71,7 +89,16 @@ export class DocumentGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.roomUserCounts.set(docId, count);
 
     if (count === 0) {
-      console.log(`No local users left for document ${docId}. Unsubscribing from Redis.`);
+      console.log(`No local users left for document ${docId}. Saving to DB and unsubscribing from Redis.`);
+      
+      // Clear pending debounce save timeout and save immediately
+      const timeout = this.saveTimeouts.get(docId);
+      if (timeout) {
+        clearTimeout(timeout);
+        this.saveTimeouts.delete(docId);
+      }
+      await this.saveDocumentToDb(docId);
+
       await this.redisService.unsubscribe(`doc-updates:${docId}`);
       this.activeDocs.delete(docId);
       this.roomUserCounts.delete(docId);
@@ -130,6 +157,17 @@ export class DocumentGateway implements OnGatewayConnection, OnGatewayDisconnect
       Y.applyUpdate(ydoc, new Uint8Array(updateBinary));
       const base64Update = Buffer.from(updateBinary).toString('base64');
       await this.redisService.publish(`doc-updates:${docId}`, base64Update);
+
+      // Debounce database save to avoid spamming PostgreSQL on every keystroke
+      const existingTimeout = this.saveTimeouts.get(docId);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+      const timeout = setTimeout(async () => {
+        this.saveTimeouts.delete(docId);
+        await this.saveDocumentToDb(docId);
+      }, 5000); // 5 seconds debounce
+      this.saveTimeouts.set(docId, timeout);
     }
   }
 
