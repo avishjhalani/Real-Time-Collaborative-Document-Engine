@@ -38,14 +38,13 @@ let DocumentService = class DocumentService {
         });
     }
     async getDocument(docId, userId) {
-        const doc = await this.prisma.document.findFirst({
+        const doc = await this.prisma.document.findUnique({
             where: {
                 id: docId,
-                ownerId: userId,
             },
         });
         if (!doc) {
-            throw new common_1.NotFoundException('Document not found or unauthorized');
+            throw new common_1.NotFoundException('Document not found');
         }
         return doc;
     }

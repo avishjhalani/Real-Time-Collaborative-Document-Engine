@@ -10,7 +10,9 @@ export declare class DocumentGateway implements OnGatewayConnection, OnGatewayDi
     server: Server;
     private activeDocs;
     private roomUserCounts;
+    private saveTimeouts;
     constructor(prisma: PrismaService, redisService: RedisService, jwtService: JwtService);
+    saveDocumentToDb(docId: string): Promise<void>;
     handleConnection(client: Socket): Promise<void>;
     handleDisconnect(client: Socket): Promise<void>;
     handleJoinDocument(client: Socket, data: {

@@ -59,10 +59,27 @@ let DocumentGateway = class DocumentGateway {
     server;
     activeDocs = new Map();
     roomUserCounts = new Map();
+    saveTimeouts = new Map();
     constructor(prisma, redisService, jwtService) {
         this.prisma = prisma;
         this.redisService = redisService;
         this.jwtService = jwtService;
+    }
+    async saveDocumentToDb(docId) {
+        const ydoc = this.activeDocs.get(docId);
+        if (!ydoc)
+            return;
+        const content = Buffer.from(Y.encodeStateAsUpdate(ydoc));
+        try {
+            await this.prisma.document.update({
+                where: { id: docId },
+                data: { content },
+            });
+            console.log(`Document ${docId} successfully saved to database.`);
+        }
+        catch (err) {
+            console.error(`Failed to save document ${docId} to database:`, err);
+        }
     }
     async handleConnection(client) {
         try {
@@ -94,7 +111,13 @@ let DocumentGateway = class DocumentGateway {
         const count = (this.roomUserCounts.get(docId) || 1) - 1;
         this.roomUserCounts.set(docId, count);
         if (count === 0) {
-            console.log(`No local users left for document ${docId}. Unsubscribing from Redis.`);
+            console.log(`No local users left for document ${docId}. Saving to DB and unsubscribing from Redis.`);
+            const timeout = this.saveTimeouts.get(docId);
+            if (timeout) {
+                clearTimeout(timeout);
+                this.saveTimeouts.delete(docId);
+            }
+            await this.saveDocumentToDb(docId);
             await this.redisService.unsubscribe(`doc-updates:${docId}`);
             this.activeDocs.delete(docId);
             this.roomUserCounts.delete(docId);
@@ -135,6 +158,15 @@ let DocumentGateway = class DocumentGateway {
             Y.applyUpdate(ydoc, new Uint8Array(updateBinary));
             const base64Update = Buffer.from(updateBinary).toString('base64');
             await this.redisService.publish(`doc-updates:${docId}`, base64Update);
+            const existingTimeout = this.saveTimeouts.get(docId);
+            if (existingTimeout) {
+                clearTimeout(existingTimeout);
+            }
+            const timeout = setTimeout(async () => {
+                this.saveTimeouts.delete(docId);
+                await this.saveDocumentToDb(docId);
+            }, 5000);
+            this.saveTimeouts.set(docId, timeout);
         }
     }
     handleCursorMove(client, cursorData) {
