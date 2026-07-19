@@ -4,6 +4,8 @@ import {
   User, Trash2, Cpu, Activity, Database 
 } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 interface DocumentInfo {
   id: string;
   title: string;
@@ -35,7 +37,7 @@ export default function Dashboard({ token, username, onSelectDocument, onLogout 
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:3000/documents', {
+      const response = await fetch(`${API_URL}/documents`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -61,7 +63,7 @@ export default function Dashboard({ token, username, onSelectDocument, onLogout 
     setCreating(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:3000/documents', {
+      const response = await fetch(`${API_URL}/documents`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +93,7 @@ export default function Dashboard({ token, username, onSelectDocument, onLogout 
 
     setDeletingId(docId);
     try {
-      const response = await fetch(`http://localhost:3000/documents/${docId}`, {
+      const response = await fetch(`${API_URL}/documents/${docId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

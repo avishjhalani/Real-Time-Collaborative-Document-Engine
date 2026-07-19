@@ -18,7 +18,8 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
     setError('');
     setLoading(true);
 
-    const url = isLogin ? 'http://localhost:3000/auth/login' : 'http://localhost:3000/auth/signup';
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const url = isLogin ? `${API_URL}/auth/login` : `${API_URL}/auth/signup`;
     const body = isLogin ? { email, password } : { email, password, username };
 
     try {
