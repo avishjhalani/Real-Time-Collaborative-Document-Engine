@@ -1,7 +1,8 @@
 # Real-Time Collaborative Document Engine
 
-A high-performance, SaaS-style real-time collaborative document workspace. It features Yjs CRDTs for conflict-free typing, live cursor presence, a dark glassmorphic dashboard, and an elegant writing canvas inspired by Notion.
+A high-performance, SaaS-style real-time collaborative document workspace. It features Yjs CRDTs for conflict-free typing, live cursor presence, a dark glassmorphic dashboard, and an elegant writing canvas .
 
+LINK: https://collabdocs-ten.vercel.app/
 ---
 
 ## 🚀 Key Features
@@ -77,9 +78,9 @@ This launches a PostgreSQL container on port `5435` and a Redis container on por
    ```
 2. Set up environment variables in `server/.env`:
    ```env
-   DATABASE_URL="postgresql://postgres:password123@localhost:5435/collab_docs?schema=public"
-   REDIS_URL="redis://localhost:6380"
-   JWT_SECRET="secure-crdt-editor-token-key-2026"
+   DATABASE_URL="your_postgres_url"
+   REDIS_URL="your_redis_url"
+   JWT_SECRET="your_secret_key"
    PORT=3000
    ```
 3. Install dependencies and start NestJS in watch mode:
@@ -95,7 +96,7 @@ This launches a PostgreSQL container on port `5435` and a Redis container on por
    ```
 2. Set up local environment variables in `client/.env.local`:
    ```env
-   VITE_API_URL=http://localhost:3000
+   VITE_API_URL=your_vite_url
    ```
 3. Install dependencies and start Vite dev server:
    ```bash
